@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------- Core identity table. Kept intentionally minimal. ----------
+model User {
+  id              String    @id @default(uuid())
+  email           String    @unique
+  passwordHash    String
+  roles           Role[]    @default([USER])
+  status          UserStatus @default(ACTIVE)
+  refreshTokenHash String?  // hashed refresh token, never the raw token
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  profile         Profile?
+  mentor          Mentor?
+
+  @@index([email])
+  @@index([createdAt])
+}
+
+enum Role {
+  ADMIN
+  USER
+  MENTOR
+  EXPERT
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  DELETED
+}
+
+// ---------- Everything that is "about" the user, not "core identity" ----------
+model Profile {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String?
+  bio       String?
+  avatarUrl String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+// ---------- Mentor-specific data lives in its own module/table ----------
+model Mentor {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  headline  String?
+  price     Int?     // in smallest currency unit
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
