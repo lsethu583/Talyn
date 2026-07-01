@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-cream text-ink antialiased;
+  }
+}
+
+/* Headline accent line — italic serif, matches the reference's two-line
+   treatment ("CHARGE MORE" / "WORRY LESS") exactly, just re-worded. */
+.headline-accent {
+  @apply block text-terracotta italic;
+}
